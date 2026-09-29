@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111">
+<title>AI穿搭测试</title>
+
+<!-- 商家版数据：如果同目录下有 products.js，会自动加载 -->
+<script>
+window.EMBEDDED_PRODUCTS = null;
+</script>
+<script src="products.js" onerror="void(0)"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;background:#f6f6f6;color:#222}
+button,input,select{font:inherit}
+.app{width:100%;max-width:520px;min-height:100vh;margin:0 auto;background:#fff}
+.home{min-height:100vh;padding:70px 24px 40px;display:flex;flex-direction:column;justify-content:center}
+.logo{display:inline-block;margin-bottom:22px;font-size:14px;color:#777;letter-spacing:2px}
+.home h1{font-size:34px;line-height:1.35;margin-bottom:18px;font-weight:800}.home h1 span{display:block;color:#8b5cf6}
+.home-desc{color:#777;line-height:1.8;font-size:15px;margin-bottom:38px}
+.start-btn,.next-btn{width:100%;border:none;background:#111;color:white;padding:17px;border-radius:14px;cursor:pointer;font-weight:600;font-size:16px}
+.tips{margin-top:18px;text-align:center;color:#aaa;font-size:12px}
+.home-links{display:flex;gap:10px;margin-top:28px}
+.home-links button{flex:1;border:1px solid #ddd;background:#fff;padding:12px;border-radius:12px;font-size:13px;color:#555;cursor:pointer}
+.quiz{display:none;min-height:100vh;padding:24px}.top-bar{display:flex;justify-content:space-between;margin-bottom:22px}
+.progress-text{font-size:13px;color:#888}.progress{width:100%;height:5px;background:#eee;border-radius:10px;overflow:hidden;margin-bottom:38px}
+.progress-inner{height:100%;width:0;background:#111;transition:.3s}.question{font-size:25px;line-height:1.5;margin-bottom:28px;font-weight:750}
+.question-sub{font-size:13px;color:#999;margin-top:-18px;margin-bottom:25px}.options{display:flex;flex-direction:column;gap:12px}
+.option{width:100%;padding:17px;border:1px solid #e5e5e5;background:#fff;border-radius:13px;text-align:left;cursor:pointer;transition:.15s}
+.option.selected{background:#111;color:#fff;border-color:#111}
+.next-btn{margin-top:20px}.next-btn:disabled{background:#ddd;color:#999;cursor:not-allowed}
+.input-group{display:flex;gap:12px;margin-bottom:20px}.input-box{flex:1}.input-box label{display:block;font-size:13px;color:#777;margin-bottom:8px}
+.input-box input{width:100%;padding:16px;border:1px solid #ddd;border-radius:12px;outline:none}
+.result{display:none;padding:28px 20px 50px}
+.result-header{text-align:center;padding:25px 10px 35px}.result-label{color:#8b5cf6;font-size:13px;margin-bottom:12px;letter-spacing:2px}.result h2{font-size:30px;margin-bottom:15px}
+.result-desc{color:#777;line-height:1.8;font-size:14px}
+.profile-card{
+  background:linear-gradient(135deg,#faf8ff 0%,#f2ecff 100%);
+  border:1px solid #ebe2ff;
+  border-radius:20px;
+  padding:22px;
+  margin-bottom:25px;
+  box-shadow:0 4px 16px rgba(139,92,246,.06);
+}
+.profile-card h3{
+  margin-bottom:16px;font-size:15px;font-weight:700;color:#4c1d95;
+  display:flex;align-items:center;gap:9px;
+}
+.profile-card h3::before{
+  content:"";width:4px;height:16px;
+  background:linear-gradient(180deg,#a78bfa,#8b5cf6);
+  border-radius:3px;
+}
+.tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{padding:8px 14px;border-radius:20px;font-size:12.5px;font-weight:500;line-height:1;transition:.15s}
+.tag.data{background:#8b5cf6;color:#fff;box-shadow:0 3px 8px rgba(139,92,246,.28)}
+.tag.pref{background:#fff;color:#5b21b6;border:1px solid #e0d5ff}
+.ai-panel{background:#111;color:#fff;border-radius:18px;padding:22px;margin-bottom:25px}
+.ai-panel-head{font-size:13px;color:#a78bfa;letter-spacing:1.5px;margin-bottom:18px;display:flex;align-items:center;gap:8px;font-weight:600}
+.ai-dot{width:7px;height:7px;border-radius:50%;background:#8b5cf6;box-shadow:0 0 10px #8b5cf6;animation:pulse 1.3s infinite}
+@keyframes pulse{50%{opacity:.25}}
+.ai-loading{font-size:13px;color:#aaa;display:flex;align-items:center;gap:10px;padding:10px 0}
+.spinner{width:14px;height:14px;border:2px solid #3a3a3a;border-top-color:#8b5cf6;border-radius:50%;animation:spin .8s linear infinite;display:inline-block;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-block{opacity:0;transform:translateY(10px);animation:rise .55s cubic-bezier(.2,.7,.3,1) forwards;margin-bottom:18px}
+.ai-block:last-child{margin-bottom:0}
+@keyframes rise{to{opacity:1;transform:translateY(0)}}
+.ai-block h4{font-size:13px;color:#a78bfa;margin-bottom:9px;font-weight:600;letter-spacing:.5px}
+.ai-block p{font-size:13.5px;line-height:1.9;color:#d6d6d6}
+.ai-block ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.ai-block li{font-size:13px;line-height:1.75;color:#c6c6c6;padding-left:15px;position:relative}
+.ai-block li::before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;border-radius:50%;background:#8b5cf6}
+.ai-block li b{color:#fff;font-weight:600}
+.ai-block .hl{color:#fff;font-weight:600}
+.section-title{font-size:20px;margin:30px 0 16px}.product{border:1px solid #eee;border-radius:16px;overflow:hidden;margin-bottom:16px;background:#fff;box-shadow:0 4px 18px rgba(0,0,0,.04)}
+.product-image{height:180px;background:linear-gradient(135deg,#eee,#ddd);display:flex;align-items:center;justify-content:center;color:#999;overflow:hidden;position:relative}
+.product-image img{width:100%;height:100%;object-fit:cover;display:block;position:relative;z-index:1}
+.product-image::after{content:"商品图片";position:absolute;color:#aaa;font-size:13px;z-index:0}
+.product-info{padding:17px}.product-name{font-size:16px;font-weight:700;margin-bottom:8px}.product-reason{font-size:13px;color:#777;line-height:1.6;margin-bottom:12px}
+.match-bar{font-size:11px;color:#8b5cf6;background:#f5f2ff;display:inline-block;padding:3px 9px;border-radius:20px;margin-bottom:10px}
+.product-bottom{display:flex;justify-content:space-between;align-items:center}.price{color:#e53935;font-size:19px;font-weight:700}.view-btn{border:0;background:#111;color:#fff;padding:9px 14px;border-radius:9px;font-size:12px;min-width:88px}
+.restart{width:100%;border:1px solid #ddd;background:#fff;padding:15px;border-radius:12px;margin-top:20px}
+.empty{color:#999;padding:24px 12px;text-align:center;font-size:13px;background:#fafafa;border-radius:12px;line-height:1.8}
+.toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%);background:rgba(0,0,0,.85);color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;display:none;z-index:9999}
+
+.admin{display:none;min-height:100vh;padding:22px;background:#f6f6f6}.admin-wrap{max-width:1000px;margin:auto}
+.admin-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:10px;flex-wrap:wrap}.admin-head h1{font-size:24px}
+.admin-btn{border:1px solid #ddd;background:#fff;padding:9px 12px;border-radius:9px;cursor:pointer;font-size:13px}
+.admin-btn.primary{background:#8b5cf6;color:#fff;border-color:#8b5cf6}
+.admin-btn.danger{color:#e53935}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.card{background:#fff;border-radius:14px;padding:18px;border:1px solid #eee}.card .label{font-size:13px;color:#888}.card .num{font-size:28px;font-weight:800;margin-top:8px}
+.panel{background:#fff;border:1px solid #eee;border-radius:14px;padding:18px;margin-bottom:18px}.panel h2{font-size:18px;margin-bottom:15px}
+.bar-row{display:grid;grid-template-columns:110px 1fr 45px;gap:10px;align-items:center;margin:12px 0;font-size:13px}
+.bar{height:10px;background:#eee;border-radius:20px;overflow:hidden}.bar i{display:block;height:100%;background:#111;border-radius:20px}
+@media(max-width:700px){.cards{grid-template-columns:repeat(3,1fr)}.admin{padding:14px}}
+
+.warehouse{display:none;min-height:100vh;padding:22px;background:#f6f6f6}
+.warehouse-wrap{max-width:1000px;margin:auto}
+.warehouse-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:10px;flex-wrap:wrap}
+.warehouse-head h1{font-size:24px}
+.warehouse-head .hint{font-size:12px;color:#888;margin-top:4px}
+.warehouse-head .btns{display:flex;gap:8px;flex-wrap:wrap}
+.warehouse-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.warehouse-card{background:#fff;border-radius:14px;overflow:hidden;border:1px solid #eee;position:relative;transition:.15s}
+.warehouse-card.disabled{opacity:.5}
+.warehouse-card .thumb{height:160px;background:#eee;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.warehouse-card .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.warehouse-card .thumb .no-img{color:#aaa;font-size:13px}
+.warehouse-card .status-badge{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);color:#fff;padding:3px 8px;border-radius:10px;font-size:11px;z-index:2}
+.warehouse-card.disabled .status-badge{background:rgba(153,153,153,.9)}
+.warehouse-card .info{padding:12px}
+.warehouse-card .info .name{font-size:14px;font-weight:700;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.warehouse-card .info .price{color:#e53935;font-size:15px;font-weight:700}
+.warehouse-card .actions{display:flex;gap:6px;padding:0 12px 12px}
+.warehouse-card .actions button{flex:1;border:1px solid #eee;background:#fff;padding:6px;border-radius:8px;font-size:12px;cursor:pointer}
+.warehouse-card .actions button:hover{border-color:#bbb}
+.warehouse-card .actions button.danger{color:#e53935}
+.warehouse-empty{text-align:center;padding:60px 20px;color:#999;background:#fff;border-radius:14px}
+
+/* 导出引导卡 */
+.export-card{
+  background:#f5f2ff;
+  border:1px solid #e0d5ff;
+  border-radius:14px;
+  padding:16px 18px;
+  margin-bottom:16px;
+  font-size:13px;
+  color:#5b21b6;
+  line-height:1.7;
+}
+.export-card b{color:#4c1d95}
+.export-card ol{margin:8px 0 0 20px;padding:0}
+.export-card li{margin:4px 0}
+
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;align-items:center;justify-content:center;padding:20px}
+.modal.show{display:flex}
+.modal-content{background:#fff;border-radius:18px;padding:24px;width:100%;max-width:420px;max-height:90vh;overflow-y:auto}
+.modal-content h3{margin-bottom:18px;font-size:18px}
+.modal-field{margin-bottom:14px}
+.modal-field label{display:block;font-size:13px;color:#666;margin-bottom:6px}
+.modal-field input,.modal-field select{width:100%;padding:11px 13px;border:1px solid #ddd;border-radius:10px;outline:none;font-size:15px;background:#fff}
+.modal-field input:focus,.modal-field select:focus{border-color:#8b5cf6}
+.upload-area{border:2px dashed #ddd;border-radius:12px;padding:20px;text-align:center;cursor:pointer;min-height:140px;display:flex;align-items:center;justify-content:center;transition:.15s;background:#fafafa}
+.upload-area:hover{border-color:#8b5cf6;background:#f5f2ff}
+.upload-area img{max-width:100%;max-height:200px;border-radius:8px;display:block}
+.upload-area span{color:#999;font-size:13px}
+.modal-actions{display:flex;gap:10px;margin-top:18px}
+.modal-actions button{flex:1;padding:12px;border-radius:10px;border:1px solid #ddd;background:#fff;cursor:pointer;font-size:14px}
+.modal-actions .primary{background:#8b5cf6;color:#fff;border-color:#8b5cf6;font-weight:600}
+
+html{scroll-behavior:smooth}
+button{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+input,select{font-size:16px}
+.start-btn:active,.next-btn:active,.option:active,.view-btn:active,.restart:active,.admin-btn:active{transform:scale(.98)}
+.quiz{padding-bottom:100px}
+.quiz .next-btn{position:sticky;bottom:16px;z-index:20;box-shadow:0 8px 24px rgba(0,0,0,.12)}
+.quiz-back{border:0;background:transparent;color:#888;font-size:13px;padding:8px 0;margin-bottom:10px;cursor:pointer}
+.option{min-height:56px;display:flex;align-items:center;line-height:1.45}
+.option .option-check{margin-left:auto;width:20px;height:20px;border:1px solid #ccc;border-radius:50%;display:grid;place-items:center;font-size:11px}
+.option.selected .option-check{border-color:#fff;background:#fff;color:#111}
+.input-box input:focus{border-color:#111;box-shadow:0 0 0 3px rgba(17,17,17,.06)}
+.home{padding-left:22px;padding-right:22px}
+.home .start-btn{box-shadow:0 10px 25px rgba(17,17,17,.14)}
+.result{padding-bottom:90px}
+.admin{min-height:100dvh}
+@media(max-width:520px){
+  .home{min-height:100dvh;padding:44px 20px 28px;justify-content:center}
+  .home h1{font-size:29px}
+  .home-desc{font-size:14px;margin-bottom:28px}
+  .quiz{padding:18px 18px 96px}
+  .progress{margin-bottom:28px}
+  .question{font-size:23px;margin-bottom:22px}
+  .options{gap:10px}
+  .option{padding:15px 14px}
+  .result{padding:18px 16px 70px}
+  .result-header{padding:18px 8px 26px}
+  .result h2{font-size:27px}
+  .ai-panel{padding:18px}
+  .product-image{height:170px}
+  .cards{gap:8px!important}
+  .card{padding:14px}
+  .card .num{font-size:22px}
+  .warehouse{padding:14px}
+  .warehouse-grid{grid-template-columns:repeat(2,1fr);gap:10px}
+  .profile-card{padding:18px}
+  .tag{padding:7px 12px;font-size:12px}
+}
+@media(min-width:521px){.home,.quiz,.result{min-height:100vh}}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+<section class="home" id="home">
+  <div class="logo">AI STYLE LAB</div>
+  <h1>测测你的穿搭人格<span>找到更适合你的风格</span></h1>
+  <p class="home-desc">回答几个简单的问题，根据你的身高、体型需求、穿衣场景和风格偏好，为你推荐更适合你的穿搭方向。</p>
+  <button class="start-btn" onclick="startQuiz()">开始测试 →</button>
+  <div class="tips">约 1 分钟完成 · 免费测试</div>
+  <div class="home-links" id="homeLinks">
+    <button onclick="openWarehouse()">📦 商品仓库</button>
+    <button onclick="openAdmin()">📊 数据后台</button>
+  </div>
+</section>
+
+<section class="quiz" id="quiz">
+  <button class="quiz-back" onclick="confirmBackToHome()">← 返回首页</button>
+  <div class="top-bar"><span class="progress-text" id="progressText">1 / 8</span></div>
+  <div class="progress"><div class="progress-inner" id="progressInner"></div></div>
+  <div id="questionArea"></div>
+  <button class="next-btn" id="nextBtn" onclick="nextQuestion()" disabled>下一题</button>
+</section>
+
+<section class="result" id="result">
+  <div class="result-header">
+    <div class="result-label">YOUR STYLE RESULT</div>
+    <h2 id="resultTitle"></h2>
+    <p class="result-desc" id="resultDesc"></p>
+  </div>
+  <div class="profile-card">
+    <h3>你的穿搭画像</h3>
+    <div class="tags" id="tags"></div>
+  </div>
+
+  <div class="ai-panel" id="aiPanel">
+    <div class="ai-panel-head"><span class="ai-dot"></span> 风格分析</div>
+    <div class="ai-loading" id="aiLoading"><span class="spinner"></span> 正在根据你的选择生成专属分析…</div>
+    <div id="aiContent"></div>
+  </div>
+
+  <h3 class="section-title">为你推荐</h3>
+  <div id="products"></div>
+
+  <button class="restart" onclick="restart()">再测一次</button>
+  <div style="text-align:center;color:#aaa;font-size:11px;margin-top:18px">测试结果仅用于穿搭推荐，不构成专业健康建议。</div>
+</section>
+</div>
+
+<section class="warehouse" id="warehouse">
+<div class="warehouse-wrap">
+  <div class="warehouse-head">
+    <div>
+      <h1>📦 商品仓库</h1>
+      <div class="hint" id="warehouseHint">共 0 件商品</div>
+    </div>
+    <div class="btns">
+      <button class="admin-btn primary" onclick="openAddProduct()">+ 添加商品</button>
+      <button class="admin-btn" onclick="exportProductsJS()">📤 导出商品数据</button>
+      <button class="admin-btn" onclick="backFromWarehouse()">返回首页</button>
+    </div>
+  </div>
+  <div class="warehouse-grid" id="warehouseGrid"></div>
+</div>
+</section>
+
+<section class="admin" id="admin">
+<div class="admin-wrap">
+  <div class="admin-head">
+    <div><h1>数据后台</h1><small>数据保存在本浏览器</small></div>
+    <div>
+      <button class="admin-btn" onclick="exportCSV()">导出CSV</button>
+      <button class="admin-btn danger" onclick="clearData()">清空数据</button>
+      <button class="admin-btn" onclick="location.href=location.pathname">返回首页</button>
+    </div>
+  </div>
+  <div class="cards">
+    <div class="card"><div class="label">测试人数</div><div class="num" id="statTests">0</div></div>
+    <div class="card"><div class="label">商品点击</div><div class="num" id="statClicks">0</div></div>
+    <div class="card"><div class="label">商品数量</div><div class="num" id="statProducts">0</div></div>
+  </div>
+  <div class="panel"><h2>结果分布</h2><div id="styleChart"></div></div>
+  <div class="panel"><h2>商品点击</h2><div id="productChart"></div></div>
+</div>
+</section>
+
+<div class="modal" id="productModal">
+  <div class="modal-content">
+    <h3 id="modalTitle">添加商品</h3>
+    <div class="modal-field">
+      <label>商品图片</label>
+      <div class="upload-area" id="uploadArea" onclick="document.getElementById('imageInput').click()">
+        <img id="previewImg" style="display:none" alt="">
+        <span id="uploadHint">点击上传图片</span>
+      </div>
+      <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="handleImageUpload(event)">
+    </div>
+    <div class="modal-field">
+      <label>商品名称</label>
+      <input id="productName" placeholder="例如：法式收腰连衣裙" maxlength="30">
+    </div>
+    <div class="modal-field">
+      <label>价格（元）</label>
+      <input id="productPrice" type="number" placeholder="例如：169" min="0" step="0.01">
+    </div>
+    <div class="modal-field">
+      <label>商品链接（可选）</label>
+      <input id="productUrl" placeholder="https://..." >
+    </div>
+    <div class="modal-field">
+      <label>适合风格</label>
+      <select id="productStyle">
+        <option value="french">法式气质</option>
+        <option value="sweet">甜美温柔</option>
+        <option value="korean">韩系休闲</option>
+        <option value="minimal">简约通勤</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button onclick="closeProductModal()">取消</button>
+      <button class="primary" onclick="saveProduct()">保存</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* =========================================================
+   一、数据加载：优先读 products.js，其次读 localStorage
+   ========================================================= */
+const PRODUCTS_KEY = "ai_style_products_v1";
+const EMBEDDED_MODE = Array.isArray(window.EMBEDDED_PRODUCTS) && window.EMBEDDED_PRODUCTS.length > 0;
+
+let editingId = null;
+let editingImage = null;
+
+function getProducts(){
+  // 商家版：优先使用内嵌数据，不允许修改
+  if(EMBEDDED_MODE){
+    return window.EMBEDDED_PRODUCTS;
+  }
+  try{
+    const raw = localStorage.getItem(PRODUCTS_KEY);
+    if(!raw) return [];
+    const list = JSON.parse(raw);
+    return Array.isArray(list) ? list : [];
+  }catch(e){
+    return [];
+  }
+}
+
+function saveProducts(list){
+  if(EMBEDDED_MODE){
+    showToast("这是商家版，无法修改商品");
+    return false;
+  }
+  try{
+    localStorage.setItem(PRODUCTS_KEY, JSON.stringify(list));
+    return true;
+  }catch(e){
+    showToast("保存失败：浏览器空间已满，请先删掉一些商品图片");
+    return false;
+  }
+}
+
+/* 页面启动时，商家版隐藏仓库和管理入口 */
+window.addEventListener('DOMContentLoaded', ()=>{
+  if(EMBEDDED_MODE){
+    const links = document.getElementById('homeLinks');
+    if(links) links.style.display = 'none';
+    console.log('[商家版] 已加载内嵌商品数据，共 ' + window.EMBEDDED_PRODUCTS.length + ' 件');
+  }
+});
+
+/* =========================================================
+   二、图片压缩 & 上传
+   ========================================================= */
+function compressImage(file, maxW, quality){
+  return new Promise((resolve, reject)=>{
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = (e)=>{
+      const img = new Image();
+      img.onerror = reject;
+      img.onload = ()=>{
+        let w = img.width, h = img.height;
+        if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
+        const canvas = document.createElement("canvas");
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0,0,w,h);
+        ctx.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handleImageUpload(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+  if(file.size > 10 * 1024 * 1024){
+    showToast("图片太大，请选择 10MB 以内的图片");
+    return;
+  }
+  try{
+    const dataUrl = await compressImage(file, 600, 0.75);
+    editingImage = dataUrl;
+    const img = document.getElementById("previewImg");
+    img.src = dataUrl;
+    img.style.display = "block";
+    document.getElementById("uploadHint").style.display = "none";
+  }catch(e){
+    showToast("图片读取失败，请换一张试试");
+  }
+}
+
+/* =========================================================
+   三、商品增删改
+   ========================================================= */
+function openAddProduct(){
+  if(EMBEDDED_MODE){ showToast("商家版无法编辑商品"); return; }
+  editingId = null;
+  editingImage = null;
+  document.getElementById("modalTitle").textContent = "添加商品";
+  document.getElementById("productName").value = "";
+  document.getElementById("productPrice").value = "";
+  document.getElementById("productUrl").value = "";
+  document.getElementById("productStyle").value = "french";
+  document.getElementById("previewImg").style.display = "none";
+  document.getElementById("previewImg").src = "";
+  document.getElementById("uploadHint").style.display = "block";
+  document.getElementById("imageInput").value = "";
+  document.getElementById("productModal").classList.add("show");
+}
+
+function editProduct(id){
+  if(EMBEDDED_MODE){ showToast("商家版无法编辑商品"); return; }
+  const p = getProducts().find(x=>x.id === id);
+  if(!p) return;
+  editingId = id;
+  editingImage = p.image || null;
+  document.getElementById("modalTitle").textContent = "编辑商品";
+  document.getElementById("productName").value = p.name || "";
+  document.getElementById("productPrice").value = p.price || "";
+  document.getElementById("productUrl").value = (p.url && p.url !== "#") ? p.url : "";
+  document.getElementById("productStyle").value = p.style || "french";
+  if(p.image){
+    document.getElementById("previewImg").src = p.image;
+    document.getElementById("previewImg").style.display = "block";
+    document.getElementById("uploadHint").style.display = "none";
+  }else{
+    document.getElementById("previewImg").style.display = "none";
+    document.getElementById("uploadHint").style.display = "block";
+  }
+  document.getElementById("productModal").classList.add("show");
+}
+
+function closeProductModal(){
+  document.getElementById("productModal").classList.remove("show");
+}
+
+function saveProduct(){
+  if(EMBEDDED_MODE){ showToast("商家版无法修改商品"); return; }
+  const name = document.getElementById("productName").value.trim();
+  const price = Number(document.getElementById("productPrice").value);
+  const url = document.getElementById("productUrl").value.trim();
+  const style = document.getElementById("productStyle").value;
+
+  if(!name){ showToast("请填写商品名称"); return; }
+  if(!price || price < 0){ showToast("请填写正确的价格"); return; }
+  if(!editingImage && !editingId){ showToast("请上传商品图片"); return; }
+
+  const list = getProducts();
+  if(editingId){
+    const idx = list.findIndex(x=>x.id === editingId);
+    if(idx >= 0){
+      list[idx].name = name;
+      list[idx].price = price;
+      list[idx].url = url || "#";
+      list[idx].style = style;
+      if(editingImage) list[idx].image = editingImage;
+    }
+  }else{
+    list.unshift({
+      id: "p_" + Date.now() + "_" + Math.floor(Math.random()*1000),
+      name, price,
+      image: editingImage,
+      url: url || "#",
+      style,
+      status: "active",
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  if(!saveProducts(list)) return;
+  closeProductModal();
+  showToast(editingId ? "已更新" : "已添加");
+  renderWarehouse();
+}
+
+function deleteProduct(id){
+  if(EMBEDDED_MODE){ showToast("商家版无法删除商品"); return; }
+  if(!confirm("确定删除这个商品吗？")) return;
+  const list = getProducts().filter(x=>x.id !== id);
+  saveProducts(list);
+  renderWarehouse();
+  showToast("已删除");
+}
+
+function toggleProductStatus(id){
+  if(EMBEDDED_MODE){ showToast("商家版无法修改商品"); return; }
+  const list = getProducts();
+  const p = list.find(x=>x.id === id);
+  if(!p) return;
+  p.status = p.status === "active" ? "inactive" : "active";
+  saveProducts(list);
+  renderWarehouse();
+}
+
+/* =========================================================
+   四、商品仓库渲染
+   ========================================================= */
+function renderWarehouse(){
+  const list = getProducts();
+  const activeCount = list.filter(p=>p.status === "active").length;
+  document.getElementById("warehouseHint").textContent = `共 ${list.length} 件商品 · 已上架 ${activeCount} 件`;
+
+  const grid = document.getElementById("warehouseGrid");
+  if(!list.length){
+    grid.innerHTML = `<div class="warehouse-empty" style="grid-column:1/-1">还没有商品，点右上角「+ 添加商品」开始吧</div>`;
+    return;
+  }
+
+  grid.innerHTML = list.map(p=>{
+    const disabled = p.status !== "active" ? " disabled" : "";
+    const thumb = p.image
+      ? `<img src="${p.image}" alt="">`
+      : `<span class="no-img">无图片</span>`;
+    const price = p.price ? `¥${p.price}` : "—";
+    return `<div class="warehouse-card${disabled}">
+      <div class="status-badge">${p.status === "active" ? "已上架" : "已下架"}</div>
+      <div class="thumb">${thumb}</div>
+      <div class="info">
+        <div class="name" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</div>
+        <div class="price">${price}</div>
+      </div>
+      <div class="actions">
+        <button onclick="editProduct('${p.id}')">编辑</button>
+        <button onclick="toggleProductStatus('${p.id}')">${p.status === "active" ? "下架" : "上架"}</button>
+        <button class="danger" onclick="deleteProduct('${p.id}')">删除</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function openWarehouse(){
+  if(EMBEDDED_MODE){ showToast("商家版不开放仓库"); return; }
+  document.getElementById("app").style.display = "none";
+  document.getElementById("warehouse").style.display = "block";
+  document.getElementById("admin").style.display = "none";
+  renderWarehouse();
+  window.scrollTo(0,0);
+}
+
+function backFromWarehouse(){
+  document.getElementById("warehouse").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  document.getElementById("home").style.display = "flex";
+  document.getElementById("quiz").style.display = "none";
+  document.getElementById("result").style.display = "none";
+  window.scrollTo(0,0);
+}
+
+/* =========================================================
+   五、导出商品数据（核心功能）
+   ========================================================= */
+function exportProductsJS(){
+  const list = getProducts();
+  if(!list.length){
+    showToast("还没有商品，先添加几个吧");
+    return;
+  }
+
+  const content =
+    "// ===========================================\n" +
+    "// AI穿搭测试 · 商品数据（商家版用）\n" +
+    "// 导出时间：" + new Date().toLocaleString() + "\n" +
+    "// 用法：把本文件和 index.html 放在同一文件夹\n" +
+    "//       一起发给商家，商家双击 index.html 即可\n" +
+    "// ===========================================\n\n" +
+    "window.EMBEDDED_PRODUCTS = " + JSON.stringify(list, null, 2) + ";\n";
+
+  const blob = new Blob([content], {type:"application/javascript;charset=utf-8"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "products.js";
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+
+  showToast("已导出 products.js，共 " + list.length + " 件商品");
+
+  // 弹个提示告诉用户怎么用
+  setTimeout(()=>{
+    alert(
+      "✅ 已导出 products.js（共 " + list.length + " 件商品）\n\n" +
+      "接下来这样做：\n" +
+      "1. 找到刚才下载的 products.js\n" +
+      "2. 把它和 index.html 放在同一个文件夹\n" +
+      "3. 这两个文件一起发给商家（微信/邮件都行）\n" +
+      "4. 商家把两个文件放同一文件夹，双击 index.html 就能用\n\n" +
+      "商家那版只能测试、看推荐，不能改商品。"
+    );
+  }, 300);
+}
+
+/* =========================================================
+   六、题库
+   ========================================================= */
+const questions=[
+{title:"你平时更喜欢哪种穿搭？",options:[["简约通勤","minimal"],["甜美温柔","sweet"],["韩系休闲","korean"],["法式气质","french"]]},
+{title:"你最常穿衣服的场景是？",options:[["上班 / 通勤","work"],["约会 / 聚会","date"],["逛街 / 日常","daily"],["旅行 / 拍照","travel"]]},
+{title:"买衣服时，你最在意什么？",options:[["显瘦","thin"],["显高","tall"],["遮胯 / 修饰腿型","hip"],["舒服好穿","comfort"]]},
+{title:"你更喜欢哪种版型？",options:[["修身，突出身材曲线","slim"],["微宽松，比较自然","regular"],["宽松，穿着舒服","loose"],["根据衣服决定","mix"]]},
+{title:"你平时更常穿什么颜色？",options:[["黑白灰","neutral"],["米色 / 卡其","earth"],["粉色 / 浅色","light"],["喜欢亮色","bright"]]},
+{title:"下面哪句话更像你？",options:[["越简单越高级","minimal"],["喜欢温柔有女人味","sweet"],["舒服最重要","korean"],["喜欢有设计感的衣服","french"]]},
+{title:"你比较希望衣服解决什么问题？",options:[["显腰线","waist"],["遮住胯部","hip"],["修饰手臂","arm"],["整体显高显瘦","overall"]]},
+{type:"info",title:"最后告诉我们你的基本信息",subtitle:"用于给你更合适的版型建议"}
+];
+
+const styleInfo={
+  minimal:["简约通勤型","你的穿搭更适合简洁、利落、有线条感的风格。选择版型清晰、颜色耐看的单品，会更容易形成高级感。"],
+  sweet:["温柔甜美型","你更适合柔和、轻盈、有女人味的穿搭。浅色系、针织、裙装等单品可以成为你的重点选择。"],
+  korean:["韩系休闲型","你比较适合自然、舒服、不用太刻意的穿搭。宽松版型和日常基础款会比较适合你的需求。"],
+  french:["法式气质型","你比较适合有线条感和设计感的穿搭。收腰、裙装以及具有视觉重点的单品会比较适合你。"]
+};
+
+const formulaByStyle={
+  minimal:"上装：纯色针织／衬衫 ＋ 下装：高腰直筒裤或A字裙 ＋ 外搭：线条简洁的西装或风衣",
+  sweet:"上装：柔软针织／泡泡袖衬衫 ＋ 下装：百褶裙或A字裙 ＋ 外搭：短款小开衫",
+  korean:"上装：宽松卫衣／衬衫 ＋ 下装：直筒牛仔裤或工装裤 ＋ 外搭：oversize衬衫当外套",
+  french:"上装：V领／方领上衣 ＋ 下装：收腰连衣裙或伞裙 ＋ 外搭：短款小香风或西装"
+};
+
+/* =========================================================
+   七、测试状态
+   ========================================================= */
+const KEY = "ai_style_stats_v1";
+let data = JSON.parse(localStorage.getItem(KEY) || '{}');
+if(!data.tests)  data.tests = 0;
+if(!data.styles) data.styles = {minimal:0, sweet:0, korean:0, french:0};
+if(!data.clicks) data.clicks = {};
+
+let currentQuestion=0, answers={}, basicInfo={}, currentStyle="minimal";
+function save(){ localStorage.setItem(KEY, JSON.stringify(data)); }
+
+function startQuiz(){
+  document.getElementById("home").style.display="none";
+  document.getElementById("result").style.display="none";
+  document.getElementById("quiz").style.display="block";
+  currentQuestion=0; answers={}; basicInfo={};
+  window.scrollTo({top:0,behavior:"instant"});
+  renderQuestion();
+}
+
+function renderQuestion(){
+  const q=questions[currentQuestion], area=document.getElementById("questionArea");
+  document.getElementById("progressText").textContent=(currentQuestion+1)+" / "+questions.length;
+  document.getElementById("progressInner").style.width=((currentQuestion+1)/questions.length*100)+"%";
+  document.getElementById("nextBtn").disabled=true;
+
+  if(q.type==="info"){
+    area.innerHTML=`<h2 class="question">${q.title}</h2><p class="question-sub">${q.subtitle}</p>
+    <div class="input-group">
+      <div class="input-box"><label>身高（cm）</label><input id="height" type="number" placeholder="例如158" oninput="checkInfo()"></div>
+      <div class="input-box"><label>体重（斤）</label><input id="weight" type="number" placeholder="例如120" oninput="checkInfo()"></div>
+    </div>
+    <div class="input-box"><label>你的预算</label><input id="budget" type="number" placeholder="例如200" oninput="checkInfo()"></div>`;
+    return;
+  }
+
+  let html=`<h2 class="question">${q.title}</h2><div class="options">`;
+  q.options.forEach((o,i)=>{
+    html+=`<button class="option" onclick="selectOption(${i},'${o[1]}')"><span>${o[0]}</span><span class="option-check">✓</span></button>`;
+  });
+  area.innerHTML=html+"</div>";
+}
+
+function selectOption(i,v){
+  answers[currentQuestion]=v;
+  document.querySelectorAll(".option").forEach((x,j)=>x.classList.toggle("selected",j===i));
+  document.getElementById("nextBtn").disabled=false;
+}
+
+function checkInfo(){
+  const h=Number(document.getElementById("height").value);
+  const w=Number(document.getElementById("weight").value);
+  const b=Number(document.getElementById("budget").value);
+  document.getElementById("nextBtn").disabled=!(h>=100&&h<=220&&w>=50&&w<=400&&b>=0&&b<=100000);
+}
+
+function nextQuestion(){
+  if(questions[currentQuestion].type==="info"){
+    const h=Number(document.getElementById("height").value);
+    const w=Number(document.getElementById("weight").value);
+    const b=Number(document.getElementById("budget").value);
+    if(!(h>=100&&h<=220&&w>=50&&w<=400&&b>=0&&b<=100000)){
+      showToast("请检查身高、体重和预算"); return;
+    }
+    basicInfo={height:h,weight:w,budget:b};
+    showResult(); return;
+  }
+  if(answers[currentQuestion]===undefined){ showToast("请选择一个答案"); return; }
+  currentQuestion++;
+  renderQuestion();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+/* =========================================================
+   八、结果页
+   ========================================================= */
+function showResult(){
+  document.getElementById("quiz").style.display="none";
+  document.getElementById("result").style.display="block";
+  window.scrollTo(0,0);
+
+  const count={minimal:0,sweet:0,korean:0,french:0};
+  Object.values(answers).forEach(v=>{ if(count[v]!==undefined) count[v]++; });
+  currentStyle=Object.keys(count).sort((a,b)=>count[b]-count[a])[0];
+
+  data.tests++; data.styles[currentStyle]++; save();
+
+  document.getElementById("resultTitle").textContent=styleInfo[currentStyle][0];
+  document.getElementById("resultDesc").textContent=styleInfo[currentStyle][1];
+
+  const tags=document.getElementById("tags");
+  let th=`<span class="tag data">📏 身高 ${basicInfo.height}cm</span>
+          <span class="tag data">⚖️ 体重 ${basicInfo.weight}斤</span>
+          <span class="tag data">💰 预算 ¥${basicInfo.budget}</span>`;
+  if(answers[1]) th+=`<span class="tag pref">🎯 场景 · ${labelOf(1,answers[1])}</span>`;
+  if(answers[2]) th+=`<span class="tag pref">✨ 在意 · ${labelOf(2,answers[2])}</span>`;
+  if(answers[6]) th+=`<span class="tag pref">💡 想改善 · ${labelOf(6,answers[6])}</span>`;
+  tags.innerHTML=th;
+
+  const loading=document.getElementById("aiLoading");
+  document.getElementById("aiContent").innerHTML="";
+  loading.style.display="flex";
+  setTimeout(()=>{ loading.style.display="none"; renderAIAnalysis(); },800);
+
+  renderProducts();
+}
+
+function labelOf(qIndex,value){
+  const q=questions[qIndex];
+  if(!q||!q.options) return value;
+  const hit=q.options.find(o=>o[1]===value);
+  return hit?hit[0]:value;
+}
+
+function tipOf(qIndex,value){
+  const tips={
+    1:{"work":"通勤单品要同时满足「得体」和「久坐不皱、好活动」。","date":"约会场合在领口、腰线、材质光泽感上做加法比整体换风格更有效。","daily":"日常更需要耐穿好搭的基础款，买合身比买流行更有用。","travel":"旅行拍照可以适当放宽版型限制，选上镜显比例的单品。"},
+    4:{"neutral":"黑白灰优势是好搭，风险是单调，可以用不同材质制造层次。","earth":"大地色很显质感也显温柔，搭配时注意和肤色拉开明暗差。","light":"浅色能提亮气色，建议浅色做上装、深色放下半身。","bright":"亮色建议只留一个重点，其余用黑白灰托住。"}
+  };
+  return (tips[qIndex]&&tips[qIndex][value])||"";
+}
+
+function buildAnalysis(){
+  const info=styleInfo[currentStyle];
+  const blocks=[];
+
+  const pref=answers[0]?labelOf(0,answers[0]):"——";
+  const self=answers[5]?labelOf(5,answers[5]):"——";
+  blocks.push({
+    h:"① 风格定位",
+    p:`${info[1]}你在「穿搭偏好」里选了<span class="hl">「${pref}」</span>，在自我描述里选了<span class="hl">「${self}」</span>，两者相互印证，说明你的审美取向很稳定。把适合你的两三个元素做扎实，就足够拉开差距。`
+  });
+
+  const list=[];
+  Object.keys(answers).sort((a,b)=>a-b).forEach(i=>{
+    const q=questions[i];
+    if(!q||!q.options) return;
+    const hit=q.options.find(o=>o[1]===answers[i]);
+    if(hit) list.push({q:q.title.slice(0,12),a:hit[0]});
+  });
+  blocks.push({h:"② 你的每个选择说明了什么",list});
+
+  blocks.push({h:"③ 身材数据与版型建议",p:buildBodyAdvice()});
+
+  const colorTip=answers[4]?tipOf(4,answers[4]):"";
+  const sceneTip=answers[1]?tipOf(1,answers[1]):"";
+  blocks.push({
+    h:"④ 颜色与场景搭配",
+    p:`${colorTip}${sceneTip}把这两条放在一起看：日常场景决定「穿什么频率最高」，颜色决定「别人第一眼记住你什么」。建议先锁定 2–3 个主色，再围绕场景补单品。`
+  });
+
+  let formula=formulaByStyle[currentStyle];
+  if(answers[6]==="waist")   formula+="；加一条腰带或把上衣塞进腰头，立刻强化腰线";
+  if(answers[6]==="hip")     formula+="；下半身避开紧身包臀，优先A字或直筒";
+  if(answers[6]==="arm")     formula+="；上装选五分袖或落肩，避免无袖";
+  if(answers[6]==="overall") formula+="；鞋裤同色可以顺势拉长腿部线条";
+  blocks.push({h:"⑤ 你的万能搭配公式",p:formula+"。"});
+
+  const pain=answers[2]?labelOf(2,answers[2]):"整体效果";
+  const fix =answers[6]?labelOf(6,answers[6]):"整体比例";
+  blocks.push({
+    h:"⑥ 总结",
+    p:`综合你的 7 个选择，核心诉求是<span class="hl">「${pain}」</span>，同时想解决<span class="hl">「${fix}」</span>的问题，风格上走「${info[0]}」路线最省力。买衣服守住两条线：腰线不低于肚脐，全身颜色不超过三种。`
+  });
+
+  return blocks;
+}
+
+function buildBodyAdvice(){
+  const h=Number(basicInfo.height),wj=Number(basicInfo.weight);
+  const kg=wj/2,bmi=kg/Math.pow(h/100,2);
+  const arr=[];
+
+  if(h<155) arr.push("身高在155cm以下，比例比绝对高度更重要，腰线尽量提到肚脐以上3–5cm");
+  else if(h<162) arr.push("身高155–162cm属于小个子区间，高腰＋同色系最省力");
+  else if(h<168) arr.push("身高在中等区间，重点放在版型和肩线是否合身");
+  else arr.push("身高偏高，可以驾驭长款、阔腿和直筒，别让上装太短显得局促");
+
+  if(bmi<18.5) arr.push("体重偏轻，可以放心用修身和叠穿增加视觉厚度");
+  else if(bmi<22) arr.push("身材比较标准，修身和微宽松都能穿，重点看比例");
+  else if(bmi<25) arr.push("体型略丰满，垂坠面料＋纵向线条比硬挺厚重更显瘦");
+  else arr.push("体型丰满，建议避开大面积膨胀感和横条纹，深色打底＋一件亮色外套更讨巧");
+
+  const budget=Number(basicInfo.budget);
+  if(budget<150) arr.push(`预算 ¥${budget} 建议集中在一件「主角单品」上，其余用基础款打底`);
+  else if(budget<300) arr.push(`预算 ¥${budget} 可以买 1 件外套或裙装 ＋ 1 件百搭上衣`);
+  else arr.push(`预算 ¥${budget} 比较充足，优先升级外套和鞋包`);
+
+  return `按你填的数据 <span class="hl">${h}cm / ${wj}斤</span>（BMI 约 ${bmi.toFixed(1)}）：`+arr.join("；")+"。";
+}
+
+function renderAIAnalysis(){
+  const c=document.getElementById("aiContent");
+  c.innerHTML="";
+  buildAnalysis().forEach((b,i)=>{
+    const div=document.createElement("div");
+    div.className="ai-block";
+    div.style.animationDelay=(i*0.13)+"s";
+    let html="";
+    if(b.h) html+=`<h4>${b.h}</h4>`;
+    if(b.p) html+=`<p>${b.p}</p>`;
+    if(b.list) html+=`<ul>${b.list.map(x=>`<li><b>${x.q}</b>：${x.a}</li>`).join("")}</ul>`;
+    div.innerHTML=html;
+    c.appendChild(div);
+  });
+}
+
+/* =========================================================
+   九、商品推荐
+   ========================================================= */
+function renderProducts(){
+  const all=getProducts().filter(p=>p.status==="active");
+  const box=document.getElementById("products");
+
+  if(!all.length){
+    box.innerHTML=`<div class="empty">商品仓库还是空的<br>点首页「📦 商品仓库」添加商品</div>`;
+    return;
+  }
+
+  const budget=Number(basicInfo.budget)||200;
+  const scored=all.map(p=>{
+    let s=0;
+    if(p.style===currentStyle) s+=6;
+    const price=Number(p.price)||0;
+    if(price<=budget) s+=5; else if(price<=budget*1.3) s+=2; else s-=3;
+    return Object.assign({},p,{_score:s});
+  }).sort((a,b)=>b._score-a._score).slice(0,3);
+
+  box.innerHTML=scored.map(p=>{
+    const rate=Math.min(99,60+p._score*3);
+    const img=p.image
+      ? `<img src="${p.image}" alt="${escapeHtml(p.name)}" onerror="this.style.display='none'">`
+      : "";
+    return `<div class="product">
+      <div class="product-image">${img}</div>
+      <div class="product-info">
+        <div class="product-name">${escapeHtml(p.name)}</div>
+        <div class="match-bar">匹配度 ${rate}%</div>
+        <div class="product-reason">${styleInfo[p.style] ? styleInfo[p.style][0] : "推荐单品"}</div>
+        <div class="product-bottom">
+          <div class="price">¥${p.price}</div>
+          <button class="view-btn" onclick="viewProduct('${p.id}')">查看商品</button>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function viewProduct(id){
+  const p=getProducts().find(x=>x.id===id);
+  if(!p) return;
+  data.clicks[id]=(data.clicks[id]||0)+1;
+  save();
+  if(p.url && p.url!=="#"){
+    window.open(p.url,"_blank","noopener,noreferrer");
+  }else{
+    showToast("这个商品暂未设置购买链接");
+  }
+}
+
+/* =========================================================
+   十、其他交互
+   ========================================================= */
+function confirmBackToHome(){
+  if(currentQuestion===0 || confirm("返回首页后，本次测试进度会清空。确定返回吗？")){
+    document.getElementById("quiz").style.display="none";
+    document.getElementById("result").style.display="none";
+    document.getElementById("home").style.display="flex";
+    window.scrollTo({top:0,behavior:"instant"});
+  }
+}
+
+function openAdmin(){
+  renderAdmin();
+  window.scrollTo({top:0,behavior:"instant"});
+}
+
+function restart(){
+  document.getElementById("result").style.display="none";
+  document.getElementById("home").style.display="flex";
+  currentQuestion=0; answers={}; basicInfo={};
+  window.scrollTo({top:0,behavior:"instant"});
+}
+
+function showToast(m){
+  const t=document.getElementById("toast");
+  t.textContent=m; t.style.display="block";
+  setTimeout(()=>t.style.display="none",1800);
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+
+/* =========================================================
+   十一、后台
+   ========================================================= */
+function renderAdmin(){
+  document.getElementById("app").style.display="none";
+  document.getElementById("warehouse").style.display="none";
+  document.getElementById("admin").style.display="block";
+
+  const products=getProducts();
+  const totalClicks=Object.values(data.clicks).reduce((a,b)=>a+b,0);
+
+  document.getElementById("statTests").textContent=data.tests;
+  document.getElementById("statClicks").textContent=totalClicks;
+  document.getElementById("statProducts").textContent=products.length;
+
+  const names={minimal:"简约通勤型",sweet:"温柔甜美型",korean:"韩系休闲型",french:"法式气质型"};
+  const max=Math.max(1,...Object.values(data.styles));
+  document.getElementById("styleChart").innerHTML=Object.keys(data.styles)
+    .map(k=>`<div class="bar-row"><span>${names[k]}</span><div class="bar"><i style="width:${data.styles[k]/max*100}%"></i></div><b>${data.styles[k]}</b></div>`)
+    .join("");
+
+  const pc=document.getElementById("productChart");
+  if(!products.length){
+    pc.innerHTML='<div class="empty">还没有商品</div>';
+  }else{
+    const maxClick=Math.max(1,...products.map(p=>data.clicks[p.id]||0));
+    pc.innerHTML=products.map(p=>
+      `<div class="bar-row"><span>${escapeHtml(p.name)}</span><div class="bar"><i style="width:${(data.clicks[p.id]||0)/maxClick*100}%"></i></div><b>${data.clicks[p.id]||0}</b></div>`
+    ).join("");
+  }
+}
+
+function clearData(){
+  if(confirm("清空测试和点击数据？（商品仓库不受影响）")){
+    data={tests:0,styles:{minimal:0,sweet:0,korean:0,french:0},clicks:{}};
+    save(); renderAdmin();
+  }
+}
+
+function exportCSV(){
+  const names={minimal:"简约通勤型",sweet:"温柔甜美型",korean:"韩系休闲型",french:"法式气质型"};
+  const rows=[["类型","名称","数量"]];
+  rows.push(["总测试人数","—",data.tests]);
+  Object.keys(data.styles).forEach(k=>rows.push(["风格分布",names[k],data.styles[k]]));
+  getProducts().forEach(p=>rows.push(["商品点击",p.name,data.clicks[p.id]||0]));
+
+  const csv="\uFEFF"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download="AI穿搭测试数据.csv";
+  a.click();
+}
+</script>
+</body>
+</html>
